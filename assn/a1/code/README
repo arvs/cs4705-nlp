@@ -54,3 +54,9 @@ MISC:	 1.000000	0.000000	0.000000
 
 This output makes sense. In a unigram model, the emission parameters for rare words will have some constant argmax for tag probability (in this case LOC), so it has
 a lot of false positives, and misses out on any of the rare words that are tagged with something other than LOC.
+
+Q5) a) run with -i or --interactive for this part
+
+	b) 
+Observations:
+There are a lot of false positives where the entity is tagged with a rare tag. This is an unfortunate consequence of having a lot of the _rare_ words dominate the rare tags, so e(_RARE_|B-LOC) is high, and dominates the pi values. 
