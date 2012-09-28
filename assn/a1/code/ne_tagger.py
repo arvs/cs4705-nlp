@@ -6,6 +6,7 @@ import csv
 import math
 import optparse
 import shutil
+from collections import defaultdict
 from count_freqs import Hmm
 """
 random assertions that are verified as correct to avoid dumb mistakes
@@ -22,8 +23,7 @@ takes argmax of tag probabilities using the model specfied in Question 4 and wri
 def write_tag_probabilities(rare=True):
 	t = Tagger("ner_train-rare.dat") if rare else Tagger("ner_train.dat")
 	outfile = "q4_prediction_file-rare" if rare else "q4_prediction_file"
-	f = open("ner_dev.dat")
-	with open(outfile, "w") as f1:
+	with open(outfile, "w") as f1, open("ner_dev.dat") as f:
 		for line in f:
 			if line != '\n':
 				p = t.tag_probabilities(line.strip())
@@ -32,7 +32,6 @@ def write_tag_probabilities(rare=True):
 				f1.write("%s %s %s\n" % (line.strip(), max_prob, (math.log(p[max_prob])) if p[max_prob] != 0 else 0))
 			else:
 				f1.write(line)
-	f.close()
 
 def interactive_log_prob():
 	t = Tagger()
@@ -43,6 +42,11 @@ def interactive_log_prob():
 			print "Log Probability: %s" % (math.log(t.compute_trigram(*trigram)) if t.compute_trigram(*trigram) > 0 else 0)
 		except EOFError:
 			break
+
+def test_viterbi(rare=False):
+	t = Tagger("ner_train-rare.dat") if rare else Tagger("ner_train.dat")
+	outfile = "viterbi_prediction_file-rare" if rare else "viterbi_prediction_file"
+	t.viterbi('ner_dev.dat',outfile)
 
 """
 The core tagger, implements the functionality for q4-q6. Imports functionality from count_freqs directly 
@@ -61,7 +65,7 @@ class Tagger(object):
 		em = self.counter.emission_counts
 		return em.get((word,tag), em.get(('_RARE_',tag), 0)) / float(self.unigrams[tag])
 
-	def compute_trigram(self,yi,y1,y2):
+	def compute_trigram(self,yi,y1='*',y2='*'):
 		return float(self.trigrams.get((y2,y1,yi),0))/self.bigrams.get((y2,y1),1)
 
 	"""
@@ -90,6 +94,25 @@ class Tagger(object):
 		prob = lambda v: v/sum(counts.values()) if sum(counts.values()) != 0 else 0
 		return {k:prob(v) for k,v in counts.iteritems()}
 
+	def viterbi(self,infile,outfile):
+		with open(infile) as f, open(outfile,"w") as f2:
+			possible_tags = self.unigrams.keys()
+			tags = ['*','*']
+			mat = defaultdict(int)
+			mat [(0,'*','*')] = 1
+			w = '*'
+			for idx,line in enumerate(f):
+				word = line.strip() if line!='\n' else 'S_STOP_S'
+				v,u = tags[-1:][0], tags[-2:-1][0]
+				pi_n = {w:mat[(idx,w,u)]*self.compute_trigram(v,w,u)*self.compute_emission(word,w) for w in possible_tags}
+				print pi_n
+				tag = max(pi_n, key=pi_n.get)
+				cur_pi = pi_n[tag]
+				tags.append(tag)
+				print (idx+1,u,v)
+				mat[(idx+1,u,v)] = cur_pi
+				f2.write('%s %s %s' % (word,tag,cur_pi))
+
 if __name__ == "__main__":
 	t = Tagger()
 	parser = optparse.OptionParser()
@@ -100,6 +123,7 @@ if __name__ == "__main__":
 	if options.interactive:
 		interactive_log_prob()
 	else:
-		t.replace_rare('ner_train.dat',10)
-		write_tag_probabilities(True)
-		write_tag_probabilities(False)
+		# t.replace_rare('ner_train.dat',10)
+		# write_tag_probabilities(True)
+		# write_tag_probabilities(False)
+		test_viterbi()
