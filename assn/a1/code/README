@@ -1,0 +1,56 @@
+Q4)
+
+========
+Without _RARE_ replacement
+========
+
+Found 9527 NEs. Expected 5931 NEs; Correct: 3907.
+
+		 precision 	recall 		F1-Score
+Total:	 0.410098	0.658742	0.505499
+PER:	 0.681129	0.538085	0.601216
+ORG:	 0.538309	0.609118	0.571529
+LOC:	 0.275033	0.798255	0.409110
+MISC:	 0.516155	0.693811	0.591941
+
+========
+With _RARE_ replacement (rare < 5)
+========
+	     precision 	recall 		F1-Score
+Total:	 0.030670	0.265217	0.054982
+PER:	 0.000000	0.000000	0.000000
+Warning: prediction file does not contain any instances of entity type ORG.
+ORG:	 1.000000	0.000000	0.000000
+LOC:	 0.030687	0.857688	0.059255
+Warning: prediction file does not contain any instances of entity type MISC.
+MISC:	 1.000000	0.000000	0.000000
+
+========
+With _RARE_ replacement (rare < 3)
+========
+
+		 precision 	recall 		F1-Score
+Total:	 0.003903	0.009105	0.005464
+PER:	 0.003646	0.015778	0.005924
+Warning: prediction file does not contain any instances of entity type ORG.
+ORG:	 1.000000	0.000000	0.000000
+LOC:	 0.004251	0.013631	0.006481
+Warning: prediction file does not contain any instances of entity type MISC.
+MISC:	 1.000000	0.000000	0.000000
+
+========
+With _RARE_ replacement (rare < 10)
+========
+
+		 precision 	recall 		F1-Score
+Total:	 0.017333	0.149890	0.031074
+Warning: prediction file does not contain any instances of entity type PER.
+PER:	 1.000000	0.000000	0.000000
+ORG:	 0.017333	0.664425	0.033786
+Warning: prediction file does not contain any instances of entity type LOC.
+LOC:	 1.000000	0.000000	0.000000
+Warning: prediction file does not contain any instances of entity type MISC.
+MISC:	 1.000000	0.000000	0.000000
+
+This output makes sense. In a unigram model, the emission parameters for rare words will have some constant argmax for tag probability (in this case LOC), so it has
+a lot of false positives, and misses out on any of the rare words that are tagged with something other than LOC.

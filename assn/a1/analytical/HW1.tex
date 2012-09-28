@@ -1,0 +1,73 @@
+\documentclass[11pt]{article}
+
+\usepackage{kpfonts}
+\usepackage[T1]{fontenc}
+
+\headheight 0.0cm
+\headsep 0.0cm
+\topmargin 0.0cm
+\topskip 0.0cm
+\oddsidemargin  0.0truein
+\textwidth      6.5truein
+\textheight     9.3truein
+
+\newcommand{\pair}[2]{{\langle {#1}, {#2} \rangle}}
+
+\usepackage{latexsym}
+\usepackage{setspace}
+\usepackage{qtree}
+\usepackage{framed}
+\qtreecenterfalse
+
+\newenvironment{vlist}{\begin{list}{}
+	{\setlength{\leftmargin}{4em} 
+	\setlength{\itemindent}{-2em}}}{\end{list}}
+
+\pagestyle{empty}
+\newcommand{\tab}{\hspace*{2em}}
+\setlength{\parskip}{2ex}
+\setlength{\parindent}{0ex}
+
+\newcommand{\rep}{{\bf f}}
+\newfont{\msym}{msbm10}
+\newcommand{\reals}{\mbox{\msym R}}
+\newcommand{\pa}{{\bf v}}
+\newcommand{\pak}{v}
+
+\begin{document}
+\large Arvind Srinivasan \\
+vs2371 \\
+Due: 9/20/2012 \\
+\centerline{\Large {\bf COMS W4705: Problem Set 1}}
+
+\subsection*{Question 1}
+In order to minimize perplexity, we must minimize the quantity \[ \frac{1}{M}\sum_{i=1}^{M} \log p(s_i) \]
+We know from the language model that \[ p(s_i) = \prod_{i=1}^{n} q(w_i | w_{i-2}, w_{i-1}) \]
+Substituting then, we get \[ \frac{1}{M}\sum_{i=1}^{M} \log \prod_{i=1}^{n} q(w_i | w_{i-2}, w_{i-1})\] 
+which can be rewritten as \[ \frac{1}{M}\sum_{i=1}^{M} \sum _{i=1}^{n} \log q(w_i | w_{i-2}, w_{i-1})\]
+where M counts example sentences, and n counts the trigrams in the sentence. Since M will not count sentences not in the data, and the sentences are stop terminated, we can see that this is equivalent to \[ \frac{1}{M}\sum_{w_1, w_2, w_3} \hbox{c}'(w_1, w_2, w_3)
+\log q(w_3, | w_1, w_2) = \frac{1}{M}L(\lambda_1, \lambda_2, \lambda_3)\] Since $\frac{1}{M}$ is constant, we can conclude that maximizing L will minimize perplexity.
+
+\subsection*{Question 2}
+
+    
+The first  problem with this is that there are no restrictions on this being a well formed probability distribution, since  $\lambda_i + ... + \lambda_n$ might not sum to 1. Consider the following example: 
+$V = \left\{{The, dog}\right\}.$ \\
+$S1 = The dog STOP $ \\
+$S2 = The dog the STOP $ \\ 
+$S3 = The dog the dog the the STOP$ \\
+
+In this case, the smoothing function will weight the unigram estimates to greater than 1. This is because unigram and bigram dominance will skew the distribution such that the trigrams have minimal weight on the estimate. This is because the way the distribution is set up, it is dependent on the trigrams. In the bigram estimate, the count of the bigrams don't vary with L (the smoothing function), which is a function of trigram counts. 
+
+\subsection*{Question 3 (15 points)}
+\begin{spacing}{2}
+\begin{framed}
+\emph{Input}: a sentence $x_i...x_n, q(s|u,v), T(x)$ \\
+\emph{Initialization}: $\pi (0,w,*,*) = 1, \pi (0,w,u,v) = 0$ $\forall u,v,w$ such that $u,v,w \neq *$ \\
+For k = 1...n: \\
+\tab if $\left|{T(u)}\right| > 0, \left|{T(v)}\right| > 0, \left|{T(w)}\right| > 0 $: \\
+\tab \tab $\pi(k,u,v,w)$ = $\max_{w \in T(w)}\pi(k-1, w, u, v)\times q(v|w,v) \times e(x_k | v)$ \\
+return $\max_{u \in T(u), v \in T(v), w \in T(w)}(\pi(n,u,v,w) \times q(STOP|u,v,w))$
+\end{framed}
+\end{spacing}
+\end{document}

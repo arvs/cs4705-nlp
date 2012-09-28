@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<HTML>
+<HEAD>
+<meta name="google-site-verification" content="OAiFBftbXQTcfOGJQjNkjsHrHCGyG4Ywq7blmNlG6JE" />
+<meta name="msvalidate.01" content="06EA00F58917014D3CD195A178D1C4AD" />
+<META name="y_key" content="c1b4db9258abd7c4">
+<meta name="Description" content="Established in 1979, the Department of Computer Science is located within the tree-lined Morningside campus on the Upper West Side of Manhattan.">
+<link rel="alternate" title="Columbia Computer Science News" href="http://www.cs.columbia.edu/rss/cucs_newsfeed.xml" type="application/rss+xml">
+<link href="/images/favicon.ico" rel="shortcut icon">
+<link rel="stylesheet" href="/css/cs-main.css" type="text/css">
+<link rel="stylesheet" href="/css/cs-frontpage.css" type="text/css">
+<link rel="stylesheet" href="/css/idTabs.css" type="text/css">
+<!-- <link rel="stylesheet" href="/css/imageflow.css" type="text/css"> -->
+<script language="JavaScript" src="/mice/mice.js"></script>
+<script type="text/javascript" src="/scripts/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="/scripts/jquery.cycle.all.min.js"></script>
+<script type="text/javascript" src="/scripts/jquery.pajinate.js"></script>
+<script type="text/javascript" src="/scripts/jquery.idTabs.min.js"></script>
+<!-- Caution: <title> field is being used for creating static contents. -->
+<!-- Please read the wiki before making any changes to the title. -->
+<title>Department of Computer Science, Columbia University | Not Found</title>
+
+<script type="text/javascript">
+$(function() {
+    $('#slideshow').cycle({
+        fx:     'fade',
+        speed:  'slow',
+        timeout: 20000,
+        pager:  '#pager',
+        slideExpr: 'img'
+    });
+});//Close Function
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#eventItems').pajinate({
+            items_per_page : 1,
+            nav_label_first : '',
+            nav_label_last : '',
+            nav_label_prev : '',
+            nav_label_next : ''
+        });
+    });
+    $(document).ready(function() {
+        $('#newsItems').pajinate({
+            items_per_page : 1,
+            nav_label_first : '',
+            nav_label_last : '',
+            nav_label_prev : '',
+            nav_label_next : ''
+        });
+    });
+</script>
+
+</HEAD>
+<BODY>
+
+<div id="frame">
+    <div id="topBar">
+        <a href="http://www.columbia.edu">
+            <img border="0" alt="" width="20" height="15" src="/images/small_crown.gif">
+        </a>
+        <ul><li><a href="http://www.columbia.edu">Columbia University</a></li>
+            <li class="last">
+                <a href="http://www.engineering.columbia.edu/">The Fu Foundation School of Engineering and Applied Science</a>
+            </li>
+        </ul>
+        <ul id="help">
+            <li class="last"><a href="/contactus">Contact Us</a></li>
+        </ul>
+    </div>
+
+    <div id="banner">
+        <a name="backtotop"></a>
+        <h1><a href="http://www.cs.columbia.edu">
+                <span class="hidden">SEAS Department Website</span>
+            </a></h1>
+    </div>
+    <div id="search"><div style="text-align:right;padding-top:3px;">
+        <!-- Search Google -->
+        <form action="http://www.cs.columbia.edu/search" id="cse-search-box">
+            <input type="hidden" name="cx" value="017181709448284692436:cjy5gsheid4" />
+            <input type="hidden" name="cof" value="FORID:11" />
+            <input type="hidden" name="ie" value="UTF-8" />
+            <input type="text" id="searchField" name="q" />
+            <input type="submit" name="sa" id="button" value="GO" />
+        </form>
+        <!-- Search Google -->
+     </div>
+</div>
+
+
+<div id="main">
+<div id="sideBar"><div id="nav">
+    <ul>
+                        <ul>
+                                        <li id="parent">People</li>
+                                            <li><a href="/people/faculty"
+                                    class="firstSubItem"
+                                >Faculty</a></li>
+                                                                <li><a href="/people/directory"
+                                    class="lastSubItem"
+                                >Directory</a></li>
+                                    <li><a class="noLink"></a>&nbsp;</li>
+                                                            <li id="parent">Research</li>
+                                            <li><a href="/research/areas"
+                                    class="firstSubItem"
+                                >Areas</a></li>
+                                                                <li><a href="/research/labs"
+                                >Labs</a></li>
+                                                                <li><a href="/research/achievements"
+                                    class="lastSubItem"
+                                >Achievements</a></li>
+                                    <li><a class="noLink"></a>&nbsp;</li>
+                                                            <li id="parent">Education</li>
+                                            <li><a href="/education/admissions"
+                                    class="firstSubItem"
+                                >Admissions</a></li>
+                                                                <li><a href="/education/undergrad"
+                                >Undergraduate</a></li>
+                                                                <li><a href="/education/ms"
+                                >M.S.</a></li>
+                                                                <li><a href="/education/phd"
+                                >Ph.D.</a></li>
+                                                                <li><a href="/education/courses"
+                                    class="lastSubItem"
+                                >Courses</a></li>
+                                    <li><a class="noLink"></a>&nbsp;</li>
+                                                            <li id="parent">Student Life</li>
+                                            <li><a href="/studentlife/deptlife"
+                                    class="firstSubItem"
+                                >Departmental Life</a></li>
+                                                                <li><a href="/studentlife/campuslife"
+                                >Campus Life</a></li>
+                                                                <li><a href="/studentlife/lifeinnyc"
+                                >Life in NYC</a></li>
+                                                                <li><a href="/studentlife/lifeaftercscu"
+                                    class="lastSubItem"
+                                >Life after CS@CU</a></li>
+                                    <li><a class="noLink"></a>&nbsp;</li>
+                                                            <li id="parent">Bulletin</li>
+                                            <li><a href="/bulletin/press"
+                                    class="firstSubItem"
+                                >In The Press</a></li>
+                                                                <li><a href="/bulletin/news"
+                                >News</a></li>
+                                                                <li><a href="/bulletin/newsletters"
+                                >Newsletters</a></li>
+                                                                <li><a href="/bulletin/lectures"
+                                    class="lastSubItem"
+                                >Distinguished Lectures</a></li>
+                                    <li><a class="noLink"></a>&nbsp;</li>
+                                                            <li id="parent">Resources</li>
+                                                                <li><a href="/resources">A to Z</a></li>
+                                                                <li><a href="/~crf">Computing</a></li>
+                                                <li><a href="/resources/jobs"
+                                >Jobs</a></li>
+                                                                <li><a href="/resources/techreports"
+                                >Technical Reports</a></li>
+                                                 
+                <li><a href="https://cubmail.cc.columbia.edu/horde/imp/">Webmail</a></li>
+                                                <li><a href="/resources/directions"
+                                >Directions</a></li>
+                                                 
+                <li><a href="http://wiki.cs.columbia.edu">Wiki</a></li>
+                                                <li><a href="/resources/copyright"
+                                    class="lastSubItem"
+                                >Copyright FAQ</a></li>
+                                    <li><a class="noLink"></a>&nbsp;</li>
+                                            </ul>
+<!-- <div id="quickLinks">
+    <h4>Quick Links:</h4>
+    <ul>
+        <li><a href="/lectures">Distinguished Lecture Series</a></li>
+        <li><a href="/resources/video/2011/spring">Faculty Candidate Colloquium</a></li>
+    </ul>
+</div> -->
+</div>
+
+</div>
+
+<div id="contentFrame">
+            <div id="pageTitle"><h2>Page Not Found</h2></div>
+        <div id="content">
+        <br>
+<p>The page you are trying to reach does not exist.</p>
+<p>We have recently redesigned our website, so the page you are trying to reach may have been moved.</p>
+<br>
+<br>
+<br>
+You can search for the page:
+<p>
+<!-- Search Google -->
+<FORM method=GET action="http://www.cs.columbia.edu/search">
+<TABLE bgcolor=#FFFFFF cellspacing=0 border=0><tr valign=middle>
+<td>
+<INPUT TYPE=text name=q size=31 maxlength=255 value="">
+<INPUT TYPE=submit name=sa VALUE="Search">
+</td>
+<td>
+</td></tr>
+</TABLE>
+</FORM>
+</p>
+<br><br>
+<p>
+Contact the <script type="text/javascript">
+hideemail('', 'webmaster','cs.columbia.edu','','webmaster')
+</script> with questions or comments about this site.
+</p>
+<!-- Search Google -->
+        <div id="iconBox">
+         <a href="http://twitter.com/ColumbiaCompSci" target="_blank"><img src="/icons/twitter.png" /></a>
+         <a href="http://www.cs.columbia.edu/rss/cucs_newsfeed.xml" target="_blank"><img src="/icons/RSS.png" /></a>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<div id="footer">
+    <div id="bottomBar">
+        <ul><li class="first">
+            <a href="http://www.columbia.edu/help/copyright.html" target="blank">&copy; Columbia University</a></li>
+            <li><a href="mailto:webmaster@cs.columbia.edu">webmaster</a></li>
+        </ul>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-11398234-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+
+</BODY>
+
+</HTML>
