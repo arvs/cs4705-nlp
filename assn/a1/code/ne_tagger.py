@@ -4,6 +4,7 @@ __author__="Arvind Srinivasan <vs2371@columbia.edu>"
 import re
 import csv
 import math
+import optparse
 import shutil
 from count_freqs import Hmm
 """
@@ -32,6 +33,17 @@ def write_tag_probabilities(rare=True):
 			else:
 				f1.write(line)
 	f.close()
+
+def interactive_log_prob():
+	t = Tagger()
+	while True:
+		try:
+			trigram = raw_input("\n Enter the trigram - yi-2, yi-1, yi separated by spaces: ").split(' ')
+			trigram.reverse()
+			print "Log Probability: %s" % (math.log(t.compute_trigram(*trigram)) if t.compute_trigram(*trigram) > 0 else 0)
+		except EOFError:
+			break
+
 """
 The core tagger, implements the functionality for q4-q6. Imports functionality from count_freqs directly 
 to avoid lots of file i/o
@@ -42,11 +54,20 @@ class Tagger(object):
 		with open(infile) as f:
 			self.counter.train(f)
 		self.unigrams = {k[0]:v for k,v in self.counter.ngram_counts[0].iteritems()}
+		self.bigrams = self.counter.ngram_counts[1]
+		self.trigrams = self.counter.ngram_counts[2]
 
 	def compute_emission(self, word, tag):
 		em = self.counter.emission_counts
 		return em.get((word,tag), em.get(('_RARE_',tag), 0)) / float(self.unigrams[tag])
 
+	def compute_trigram(self,yi,y1,y2):
+		return float(self.trigrams.get((y2,y1,yi),0))/self.bigrams.get((y2,y1),1)
+
+	"""
+	basic file replacement, writes to a new file called rare-{infile} where infile is provided. Can pass a threshold of how many common_words
+	is considered "rare"
+	"""
 	def replace_rare(self,infile,threshold=5):
 		common_words = [k[0] for k,v in self.counter.emission_counts.iteritems() if v >= threshold]
 		f = open(infile)
@@ -61,7 +82,9 @@ class Tagger(object):
 				f2.write(line) # probably not necessary to write empty lines, but useful to check that it didn't lose data
 		f.close()
 		f2.close()
-
+	"""
+	returns a dictionary of relative probabilities for emission counts
+	"""
 	def tag_probabilities(self,word):
 		counts = {tag:self.compute_emission(word,tag) for tag in self.unigrams}
 		prob = lambda v: v/sum(counts.values()) if sum(counts.values()) != 0 else 0
@@ -69,6 +92,14 @@ class Tagger(object):
 
 if __name__ == "__main__":
 	t = Tagger()
-	t.replace_rare('ner_train.dat',10)
-	write_tag_probabilities(True)
-	write_tag_probabilities(False)
+	parser = optparse.OptionParser()
+	parser.add_option("-i", "--interactive",
+                  action="store_true", dest="interactive", default=False,
+                  help="Run in interactive mode for trigram probabilities.")
+	(options,args) = parser.parse_args()
+	if options.interactive:
+		interactive_log_prob()
+	else:
+		t.replace_rare('ner_train.dat',10)
+		write_tag_probabilities(True)
+		write_tag_probabilities(False)
