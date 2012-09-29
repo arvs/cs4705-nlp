@@ -17,6 +17,7 @@ def test_minimal():
 	assert t.compute_emission('University','I-ORG'), 0.001299870013
 	t_rare = Tagger('ner_train-rare.dat')
 	assert t_rare.compute_emission('University','I-ORG'), 0.00130039011704
+	# assert t_rare.compute_emission('_RARE_')
 
 
 """
@@ -28,10 +29,11 @@ def write_tag_probabilities(rare=True,num_lines=60000):
 	with open(outfile, "w") as f1, open("ner_dev.dat") as f:
 		for line in f:
 			if line != '\n':
-				p = t.tag_probabilities(line.strip())
+				p = {tag: t.compute_emission(line.strip(),tag) for tag in t.unigrams}
+				print p
 				max_prob = max(p, key=p.get)
 				# can't take log of 0, so defaults
-				f1.write("%s %s %s\n" % (line.strip(), max_prob, ln(p[max_prob])))
+				f1.write("%s %s %s\n" % (line.strip(), max_prob, p[max_prob]))
 			else:
 				f1.write(line)
 
@@ -48,7 +50,7 @@ def interactive_log_prob():
 def test_viterbi(rare=False):
 	t = Tagger("ner_train-rare.dat") if rare else Tagger("ner_train.dat")
 	outfile = "viterbi_prediction_file-rare" if rare else "viterbi_prediction_file"
-	t.viterbi('ner_dev.dat',outfile,num_lines=60000)
+	t.viterbi('ner_dev.dat',outfile,num_lines=15)
 
 """
 The core tagger, implements the functionality for q4-q6. Imports functionality from count_freqs directly 
@@ -70,10 +72,10 @@ class Tagger(object):
 		if tag == '*':
 			return 0
 		if (word,tag) in em:
-			return em[(word,tag)]/float(self.unigrams[tag])
+			return ln(em[(word,tag)]) - ln(float(self.unigrams[tag]))
 		else:
 			# print "%s : %s" % (('_RARE_',tag),em[('_RARE_',tag)])
-			return em[('_RARE_',tag)]/float(self.unigrams[tag])
+			return ln(em[('_RARE_',tag)]) - ln(float(self.unigrams[tag]))
 
 	def compute_trigram(self,yi,y1,y2):
 		return float(self.trigrams.get((y2,y1,yi),0))/self.bigrams.get((y2,y1),1)
@@ -85,20 +87,21 @@ class Tagger(object):
 	def replace_rare(self,infile,threshold=5):
 		wordcounts = defaultdict(int)
 		for tup in self.counter.emission_counts.iteritems():
-			wordcounts[tup[0][0]] += tup[1] #aggregates counts of words total, with any tag
+			wordcounts[tup[0][0]] += tup[1] # aggregates counts of words total, with any tag
+		print wordcounts
 		common_words = [k for k,v in wordcounts.iteritems() if v >= threshold]
 		replaced = 0
 		f = open(infile)
 		f2 = open(infile.replace('.dat','-rare.dat'), 'w')
 		for line in f:
 			if len(line.split(' ')) == 2:
-				if line.split(' ')[0] not in common_words: #closed set, there are more rare than not rare, we know it's one or the other
+				if line.split(' ')[0] not in common_words: # closed set, there are more rare than not rare, we know it's one or the other
 					f2.write(line.replace(line.split(' ')[0], '_RARE_', 1))
 					replaced +=1
 				else:
 					f2.write(line)
 			else:
-				f2.write(line) # probably not necessary to write empty lines, but useful to check that it didn't lose data
+				f2.write(line) # maintain stops
 		f.close()
 		f2.close()
 		print replaced
@@ -152,8 +155,8 @@ if __name__ == "__main__":
 	if options.interactive:
 		interactive_log_prob()
 	else:
-		t.replace_rare('ner_train.dat',5)
-		# write_tag_probabilities(True)
-		# write_tag_probabilities(False)
+		# t.replace_rare('ner_train.dat',5)
+		write_tag_probabilities(True)
+		write_tag_probabilities(False)
 		# test_viterbi(True)
 		# test_viterbi(False)
