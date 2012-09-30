@@ -4,6 +4,7 @@ __author__="Arvind Srinivasan <vs2371@columbia.edu>"
 import re
 import csv
 import math
+import itertools
 import optparse
 import shutil
 from collections import defaultdict
@@ -50,10 +51,11 @@ def interactive_log_prob():
 		except EOFError:
 			break
 
-def test_viterbi(rare=False,num_lines=60000):
+def test_viterbi(rare=False,num_lines=60000,minimal=False):
 	t = Tagger("ner_train-rare.dat") if rare else Tagger("ner_train.dat")
 	outfile = "viterbi_prediction_file-rare" if rare else "viterbi_prediction_file"
-	t.viterbi('ner_dev.dat',outfile,num_lines)
+	filename = "dev-minimal" if minimal else "ner_dev.dat"
+	t.viterbi(filename,outfile,num_lines)
 
 """
 The core tagger, implements the functionality for q4-q6. Imports functionality from count_freqs directly 
@@ -118,36 +120,44 @@ class Tagger(object):
 		prob = lambda v: v/sum(counts.values()) if sum(counts.values()) != 0 else 0
 		return {k:prob(v) for k,v in counts.iteritems()}
 
-	def viterbi(self,infile,outfile,num_lines):
+	def viterbi(self,infile,outfile):
 		with open(infile) as f, open(outfile,"w") as f2:
-			possible_tags = self.unigrams.keys()
-			possible_tags.append('*')
-			mat = defaultdict(lambda: 1)
-			mat [(0,'*','*')] = 1
-			idx = 0
+			sentence = []
 			for line in f:
 				if line == '\n':
+					tag_seq = [" ".join(x) for x in tag_sequence(sentence)]
+					for word,tag in itertools.izip(words,tag_seq):
+						f2.write('%s %s %s\n' % (word,tag))
 					f2.write('\n')
-					mat = defaultdict(lambda: 1)
-					mat [(0,'*','*')] = 1
-					idx = 0
+					sentence = []
 					continue
-				word = line.strip()
-				tags = []
-				for u in possible_tags:
-					for v in possible_tags:
-						pi_n = {w:ln(mat.get((idx,w,u),1)) + self.compute_trigram(v,w,u) + self.compute_emission(word,w) for w in possible_tags}
-						tag = max(pi_n, key=pi_n.get)
-						cur_pi = pi_n[tag]
-						mat[(idx+1,u,v)] = cur_pi
-						tags.append((tag,cur_pi))
-				# print tags
-				argmax = max(tags, key=lambda x: x[1])
-				f2.write('%s %s %s\n' % (word,argmax[0], ln(argmax[1])))
-				idx+=1
-				num_lines -= 1
-				if num_lines == 0:
-					return
+				else:
+					sentence.append(line.strip())
+
+	def tag_sequence(sentence):
+		possible_tags = self.unigrams.keys()
+		bp = {0:defaultdict(lambda: 0)}
+		for i,word in enumerate(sentence):
+			for u,v in itertools.product(possible_tags,repeat=2):
+				tag_max = ('sentinel', -100)
+				for w in possible_tags:
+					tags[w] = ln(bp[i-1][(w, u)]) + self.compute_trigram(v,w,u) + self.compute_emission(word,w)
+					if tags[w] > tag_max[1]:
+						tag_max = (w,tags[w])
+				bp[i][(u,v)] = tag_max
+
+		n = len(sentence)
+		last = {(u,v): ln(bp[n][(u,v)]) + compute_trigram('STOP',u,v) for u,v in bp[n-1]}
+		yn1,yn = max(last, key=last.get)
+		seq = [yn,yn1]
+
+		for i in xrange(len(sentence) - 3, 0, -1):
+			u,v = tuple(x[0] for x in reversed(seq[-2:]))
+			seq.append(bp[i+2][(u,v)])
+		return reversed(seq)
+
+
+
 
 if __name__ == "__main__":
 	ln = lambda x: math.log(x) if x > 0 else 0
@@ -156,6 +166,10 @@ if __name__ == "__main__":
 	parser.add_option("-i", "--interactive",
                   action="store_true", dest="interactive", default=False,
                   help="Run in interactive mode for trigram probabilities.")
+
+	parser.add_option("-m", "--minimal",
+                  action="store_true", dest="minimal", default=False,
+                  help="Run in minimal (testing) mode, which uses a small/faster corpus for viterbi")
 	(options,args) = parser.parse_args()
 	if options.interactive:
 		interactive_log_prob()
@@ -163,5 +177,5 @@ if __name__ == "__main__":
 		# t.replace_rare('ner_train.dat',5)
 		# write_tag_probabilities(True)
 		# write_tag_probabilities(False)
-		test_viterbi(True)
+		test_viterbi(True,minimal=options.minimal)
 		# test_viterbi(False)
