@@ -51,11 +51,11 @@ def interactive_log_prob():
 		except EOFError:
 			break
 
-def test_viterbi(rare=False,num_lines=60000,minimal=False):
+def test_viterbi(rare=False,minimal=False):
 	t = Tagger("ner_train-rare.dat") if rare else Tagger("ner_train.dat")
 	outfile = "viterbi_prediction_file-rare" if rare else "viterbi_prediction_file"
 	filename = "dev-minimal" if minimal else "ner_dev.dat"
-	t.viterbi(filename,outfile,num_lines)
+	t.viterbi(filename,outfile)
 
 """
 The core tagger, implements the functionality for q4-q6. Imports functionality from count_freqs directly 
@@ -121,43 +121,49 @@ class Tagger(object):
 		return {k:prob(v) for k,v in counts.iteritems()}
 
 	def viterbi(self,infile,outfile):
+		
+		def write_to_pred_file(f,sentence):
+			tag_seq = [" ".join(x) for x in self.tag_sequence(sentence)]
+			for word,tag in itertools.izip(sentence,tag_seq):
+				f.write('%s %s\n' % (word,tag))
+			f.write('\n')
+
 		with open(infile) as f, open(outfile,"w") as f2:
 			sentence = []
 			for line in f:
 				if line == '\n':
-					tag_seq = [" ".join(x) for x in tag_sequence(sentence)]
-					for word,tag in itertools.izip(words,tag_seq):
-						f2.write('%s %s %s\n' % (word,tag))
-					f2.write('\n')
+					# print list(self.tag_sequence(sentence))
+					write_to_pred_file(f2,sentence)
 					sentence = []
 					continue
 				else:
 					sentence.append(line.strip())
+			write_to_pred_file(f2,sentence)
 
-	def tag_sequence(sentence):
+
+	def tag_sequence(self,sentence):
 		possible_tags = self.unigrams.keys()
-		bp = {0:defaultdict(lambda: 0)}
-		for i,word in enumerate(sentence):
+		bp = defaultdict(lambda: defaultdict(lambda: ('*',0)))
+		for i,word in enumerate(sentence, start=1):
 			for u,v in itertools.product(possible_tags,repeat=2):
 				tag_max = ('sentinel', -100)
+				tags = {}
 				for w in possible_tags:
-					tags[w] = ln(bp[i-1][(w, u)]) + self.compute_trigram(v,w,u) + self.compute_emission(word,w)
-					if tags[w] > tag_max[1]:
+					tags[w] = ln(bp[i-1][(w, u)][1]) + self.compute_trigram(v,w,u) + self.compute_emission(word,w)
+					if tags[w] > tag_max[1] and tags[w] != 0:
 						tag_max = (w,tags[w])
 				bp[i][(u,v)] = tag_max
 
 		n = len(sentence)
-		last = {(u,v): ln(bp[n][(u,v)]) + compute_trigram('STOP',u,v) for u,v in bp[n-1]}
+		last = {(u,v): ln(bp[n-1][(u,v)][1]) + self.compute_trigram('STOP',u,v) for u,v in bp[n-1]}
 		yn1,yn = max(last, key=last.get)
-		seq = [yn,yn1]
+		conf = last[(yn1,yn)]
+		seq = [(yn,str(conf)), (yn1,str(conf))]
 
-		for i in xrange(len(sentence) - 3, 0, -1):
+		for i in xrange(len(sentence) - 2, 0, -1):
 			u,v = tuple(x[0] for x in reversed(seq[-2:]))
-			seq.append(bp[i+2][(u,v)])
-		return reversed(seq)
-
-
-
+			seq.append(map(str,bp[i+2][(u,v)]))
+		return seq
 
 if __name__ == "__main__":
 	ln = lambda x: math.log(x) if x > 0 else 0
