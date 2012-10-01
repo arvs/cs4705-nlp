@@ -164,13 +164,11 @@ class Tagger(object):
 						tags[w] = bp[i-1][(w,u)][1]*self.compute_trigram(v,u,w)*self.compute_emission(word,v)
 						if tags[w] > tag_max[1] and tags[w] != 0:
 							tag_max = (w,tags[w])
-							print v,tag_max
 					bp[i][(u,v)] = tag_max if tag_max != ('sentinel',-1) else ('O',0)
 
 		n = len(sentence)
 		last = {(u,v): bp[n][(u,v)][1]*self.compute_trigram('STOP',v,u) for u,v in bp[n].keys()}
 		print "\n\n"
-		print last
 		yn1,yn = max(last, key=last.get)
 		conf = last[(yn1,yn)]
 		seq = [(yn,str(ln(conf))), (yn1,str(ln(conf)))]
