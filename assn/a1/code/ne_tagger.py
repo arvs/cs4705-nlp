@@ -10,7 +10,7 @@ import shutil
 from collections import defaultdict
 from count_freqs import Hmm
 
-ln = lambda x: math.log(x) if x > 0 else 0
+ln = lambda x: math.log(x) if x > 0 else "-inf"
 
 
 """
@@ -37,7 +37,7 @@ def write_tag_probabilities(rare=True):
 				p = dict(filter(lambda t: t[1]!=0, p.iteritems()))
 				max_prob = max(p, key=p.get)
 				# can't take log of 0, so defaults
-				f1.write("%s %s %s\n" % (line.strip(), max_prob, p[max_prob]))
+				f1.write("%s %s %s\n" % (line.strip(), max_prob, ln(p[max_prob])))
 			else:
 				f1.write(line)
 
@@ -47,7 +47,7 @@ def interactive_log_prob():
 		try:
 			trigram = raw_input("\n Enter the trigram - yi-2, yi-1, yi separated by spaces: ").split(' ')
 			trigram.reverse()
-			print "Log Probability: %s" % t.compute_trigram(*trigram)
+			print "Log Probability: %s" % ln(t.compute_trigram(*trigram))
 		except EOFError:
 			break
 
@@ -78,14 +78,14 @@ class Tagger(object):
 		if tag == '*':
 			return 0
 		if (word,tag) in em:
-			return ln(em[(word,tag)]) - ln(float(self.unigrams[tag]))
+			return em[(word,tag)]/float(self.unigrams[tag])
 		elif word in self.words:
 			return 0
 		else:
-			return ln(em[('_RARE_',tag)]) - ln(float(self.unigrams[tag]))
+			return em[('_RARE_',tag)]/float(self.unigrams[tag])
 
 	def compute_trigram(self,yi,y1,y2):
-		return ln(self.trigrams.get((y2,y1,yi),0)) - ln(self.bigrams.get((y2,y1),1))
+		return self.trigrams.get((y2,y1,yi),0)/float(self.bigrams.get((y2,y1),1))
 
 	"""
 	basic file replacement, writes to a new file called rare-{infile} where infile is provided. Can pass a threshold of how many common_words
@@ -143,30 +143,51 @@ class Tagger(object):
 
 	def tag_sequence(self,sentence):
 		possible_tags = self.unigrams.keys()
-		bp = defaultdict(lambda: defaultdict(lambda: ('*',0)))
-		for i,word in enumerate(sentence, start=1):
-			for u,v in itertools.product(possible_tags,repeat=2):
-				tag_max = ('sentinel', -100)
+		possible_tags.append('*')
+		bp = {i:{} for i in range(len(sentence) + 1)}
+		bp[0] = {t:('O',0) for t in itertools.product(possible_tags,repeat=2)}
+		bp[0][('*','*')] = (1.0,1.0)
+		for v in possible_tags:
+			tag_max = ('sentinel',-1)
+			tags = {}
+			for w in possible_tags:
+				# print "word: %s, v: %s, w: %s, q: %s, e: %s" % (sentence[0], v,w,self.compute_trigram(v,w,'*'), self.compute_emission(sentence[0],v))
+				tags[w] = bp[0][(w,'*')][1]*self.compute_trigram(v,w,'*')*self.compute_emission(sentence[0],v)
+				if tags[w] > tag_max[1] and tags[w] != 0:
+					tag_max = (w,tags[w])
+					print v, tag_max
+			bp[1][('*',v)] = tag_max if tag_max != ('sentinel',-1) else ('O',0)
+		# print bp[1]
+		for i,word in enumerate(sentence[1:], start=2):
+			for v,u in itertools.product(possible_tags,repeat=2):
+				tag_max = ('sentinel', -1)
 				tags = {}
 				for w in possible_tags:
-					tags[w] = ln(bp[i-1][(w, u)][1]) + self.compute_trigram(v,w,u) + self.compute_emission(word,w)
-					if tags[w] > tag_max[1] and tags[w] != 0:
-						tag_max = (w,tags[w])
-				bp[i][(u,v)] = tag_max
-
+					# print "word: %s, u: %s, v: %s, w: %s, q: %s, e: %s" % (word, u,v,w,self.compute_trigram(v,w,u), self.compute_emission(word,v))
+					if (w,u) in bp[i-1]:
+						tags[w] = bp[i-1][(w,u)][1]*self.compute_trigram(v,u,w)*self.compute_emission(word,v)
+						if tags[w] > tag_max[1] and tags[w] != 0:
+							tag_max = (w,tags[w])
+							print v,tag_max
+					bp[i][(u,v)] = tag_max if tag_max != ('sentinel',-1) else ('O',0)
+			print "\n\n"
+		print bp[2]
 		n = len(sentence)
-		last = {(u,v): ln(bp[n-1][(u,v)][1]) + self.compute_trigram('STOP',u,v) for u,v in bp[n-1]}
+		print n
+		last = {(u,v): bp[n][(u,v)][1]*self.compute_trigram('STOP',v,u) for u,v in bp[n].keys()}
+		print "\n\n"
+		print last
 		yn1,yn = max(last, key=last.get)
 		conf = last[(yn1,yn)]
-		seq = [(yn,str(conf)), (yn1,str(conf))]
+		seq = [(yn,str(ln(conf))), (yn1,str(ln(conf)))]
 
 		for i in xrange(len(sentence) - 2, 0, -1):
 			u,v = tuple(x[0] for x in reversed(seq[-2:]))
-			seq.append(map(str,bp[i+2][(u,v)]))
+			prev = bp[i+2][(u,v)]
+			seq.append((prev[0], str(ln(prev[1]))))
 		return seq
 
 if __name__ == "__main__":
-	ln = lambda x: math.log(x) if x > 0 else 0
 	t = Tagger()
 	parser = optparse.OptionParser()
 	parser.add_option("-i", "--interactive",
