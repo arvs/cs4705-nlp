@@ -1,0 +1,31 @@
+Nizar Habash - Research prof at Center for Computational Learning Systems
+
+Arabic Translation:
+	- Arabic script also used for Persian, Urdu, etc
+	- modern / standard arabic + arabic dialects
+
+- Arabic script is an alphabet --> vs character language. Similar to Hebrew, Aramaic, etc
+	- discrete letters with diacritics
+	- diacritic can change pronunciation dramatically
+	- some diacritics 
+	- no distinction betwen print and handwriting
+	- no capitalization
+	- right to left
+	- ambiguous shapes
+	- connective+disconnective letters
+	- spaces do not separate words neccessarily (some characters have necessary spacing)
+	- diacritics as vowels:
+		- zero width characters, used for short vowels
+		- not observed strictly -- people sometimes don't write vowels, often inferred from context 
+	- diacritics as lack of vowel
+		- doubling consonant or indicating that it is not a voweled word
+	- ligatures
+
+	numbers
+		- western arabic numerals are same as english numerals, and written left to right
+		- 2 other numeral systems for different regions
+
+- Techniques for disambiguation
+	- extending connecting bar between words to figure out whether there are two separate words
+
+MADA (morphological disambiguation for part of speech tagging)
