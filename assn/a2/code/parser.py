@@ -28,12 +28,11 @@ class Parser:
             with open(infile) as f, open(outfile,'w') as f2:
                 for line in f:
                     line_words = set(line.translate(None,'[,"]\n').split()) #strip json characters
-                    rare_in_line = rare_words & line_words
+                    rare_in_line = rare_words & line_words #intersection of rare and in line
                     if len(rare_in_line) > 0:
-                        print rare_in_line
-                        l = line.replace(rare_in_line.pop(),'_RARE_')
+                        l = line.replace('"%s"' % rare_in_line.pop(),'"_RARE_"')
                         for w in rare_in_line:
-                            l = l.replace(w,'_RARE_')
+                            l = l.replace('"%s"' % w,'"_RARE_"')
                         f2.write(l)
                     else:
                         f2.write(line)
@@ -44,5 +43,13 @@ class Parser:
             vocabulary[word] += count
         rare_words = set(map(lambda x: x[0], filter(lambda c: c[1] < 5, vocabulary.iteritems()))) - set(self.counter.nonterm.keys())
         set_replace(rare_words, self.filename, self.filename + "-rare")
-    
 
+    def q(self, parent, children=None):
+        count_nonterm = self.counter.nonterm.get(parent)
+        if count_nonterm is None:
+            return 0
+        if isinstance(children, str):
+            rule_count = self.counter.unary.get((parent, children[0]), self.counter.unary.get(parent, '_RARE_'))
+        elif len(children) == 2:
+            rule_count = self.counter.binary.get((parent, children[0], children[1]), 0)
+        return float(rule_count)/count_nonterm
