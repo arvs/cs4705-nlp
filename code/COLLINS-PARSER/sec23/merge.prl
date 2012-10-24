@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+$file1 = shift @ARGV;
+$file2 = shift @ARGV;
+
+open(FILE1,$file1);
+open(FILE2,$file2);
+
+while(<FILE1>)
+{
+    if(m/\(TOP/)
+    {
+	$a = <FILE2>;
+	while(!($a =~ m/\(TOP/))
+	{
+	    $a = <FILE2>;
+	}
+	if(! (m/TOP~/))
+	{
+	    print $a;
+	    print STDERR "MISSED $a\n";
+	}
+	else
+	{
+	    print $_;
+	}
+
+    }
+
+}

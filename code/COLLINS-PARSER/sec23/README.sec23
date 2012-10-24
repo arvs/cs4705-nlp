@@ -1,0 +1,37 @@
+# README.sec23 gives the command lines to recreate the scored files for
+# section 23 under the parser
+#
+# It can be run as a script: as input are the three files
+# sec23.model1 sec23.model2 and sec23.model3 which were created by
+# parsing examples/sec23.tagger.
+#
+# As output are sec23.model1.scores sec23.model2.scores sec23.model3.scores
+# which give the output of the evalb scorer
+#
+# You will need to download the EVALB scorer from 
+#   ftp://ftp.cs.nyu.edu/pub/local/sekine/EVALB.tar.gz
+#
+# Steps taken in creating the scoring files:
+#
+# Models 2 and 3 of the parser fail on a few sentences in section 23,
+# due to the chart becoming too large. For this reason "merge.pl" is
+# used to place Model 1 output in the sec23.model2.merged file where model
+# 2 fails to produce output. Similarly, sec23.model2.merged is used as
+# a back-up for the sec23.model3 file, producing sec23.model3.merged
+#
+# proc_pout.prl creates treebank-scorer friendly output.
+# For the purporse of cleanSec23.prl, see the comments at the top of this
+# file.
+#
+# Finally, the evalb scorer is used to create the .scores files
+
+
+./merge.prl sec23.model2 sec23.model1 > sec23.model2.merged
+./merge.prl sec23.model3 sec23.model2.merged > sec23.model3.merged
+cat sec23.model1 | ./proc_pout.prl | ./cleanSec23.pl > sec23.model1.final
+cat sec23.model2.merged | ./proc_pout.prl | ./cleanSec23.pl > sec23.model2.final
+cat sec23.model3.merged | ./proc_pout.prl | ./cleanSec23.pl > sec23.model3.final
+
+../../../PARSEVAL/EVALB/evalb -p ../../../PARSEVAL/EVALB/COLLINS.prm sec23.tgrep.clean sec23.model1.final > sec23.model1.scores
+../../../PARSEVAL/EVALB/evalb -p ../../../PARSEVAL/EVALB/COLLINS.prm sec23.tgrep.clean sec23.model2.final > sec23.model2.scores
+../../../PARSEVAL/EVALB/evalb -p ../../../PARSEVAL/EVALB/COLLINS.prm sec23.tgrep.clean sec23.model3.final > sec23.model3.scores

@@ -1,0 +1,250 @@
+This code is the statistical natural language parser described in
+
+    M. Collins. 1999.  Head-Driven Statistical Models for Natural Language
+    Parsing. PhD Dissertation, University of Pennsylvania.
+
+Version 1.0, released Dec 15th 2002.
+
+Copyright (C) 1999 Michael Collins
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+To download the latest version of this software, follow the appropriate 
+link at
+	http://www.ai.mit.edu/people/mcollins
+
+You can send mail to mcollins@ai.mit.edu. I'll try to reply to
+queries, although I apologise in advance if I'm not able to respond --
+it is difficult to keep up with the volume of mail I receive concerned
+with the parser.
+
+CONTENTS
+
+[0] Compiling the code
+[1] Running the code
+   [1.1] More details about the command line format
+[2] Input format
+[3] Output format
+[4] Evaluating the accuracy on section 23
+[5] A list of the files included in this package
+
+==============================================================================
+[0] Compiling the code
+
+To compile the parsing code:
+
+cd code
+make
+
+If need be, use
+
+rm *.o
+
+to remove obsolete files before typing "make".
+
+==============================================================================
+[1] Running the code
+
+To run the code:
+
+To parse <tagged_file>, with output piped to <output_file>:
+
+With Model 1:
+
+gunzip -c models/model1/events.gz | code/parser <tagged_file> models/model1/grammar 10000 1 1 1 1 > <output_file> &
+
+With Model 2:
+
+gunzip -c models/model2/events.gz | code/parser <tagged_file> models/model2/grammar 10000 1 1 1 1 > <output_file> &
+
+With Model 3:
+
+gunzip -c models/model3/events.gz | code/parser <tagged_file> models/model3/grammar 10000 1 1 1 1 > <output_file> &
+
+You should see something similar to the following at stderr when you
+run the parser:
+
+Initialised lexicons
+Initialised grammar
+Loaded non-terminals
+Loaded lexicon
+Loaded grammar
+NUMSENTENCES 1917
+Hash table: 100000 lines read
+Hash table: 200000 lines read
+Hash table: 300000 lines read
+Hash table: 400000 lines read
+....
+
+There are some sample inputs in the "examples" sub-directory: If you
+run over examples/sec23.tagged with models 1, 2 and 3 you should get
+identical output to sec23/sec23.model1, sec23/sec23.model2 and
+sec23.model3 (with the exception of the timing examples, lines
+starting with "TIME"). It's probably good to do this to check that
+everything is running correctly.
+
+For example, to parse section 23 with the three models:
+
+gunzip -c models/model1/events.gz | code/parser examples/sec23.tagged models/model1/grammar 10000 1 1 1 1 > examples/sec23.model1 &
+
+gunzip -c models/model2/events.gz | code/parser examples/sec23.tagged models/model2/grammar 10000 1 1 1 1 > examples/sec23.model2 &
+
+gunzip -c models/model3/events.gz | code/parser examples/sec23.tagged models/model3/grammar 10000 1 1 1 1 > examples/sec23.model3 &
+
+
+[1.1] More details about the command line format
+
+The general format is
+
+gunzip -c events_file.gz | code/parser tagged_file grammar_stem beamsize punctuation-flag distaflag distvflag npbflag
+
+where:
+
+events_file.gz	 = file of training events
+
+tagged_file	 = the file to be parsed (see [2] for its format)
+
+grammar_stem	 = the stem for various grammar files
+
+beamsize	 = the size of the beam. 10000 is usual, 1000 will be
+		   faster at a slight cost in accuracy
+
+punctuation-flag = 1 if the punctuation constraint is to be used,
+		   you will usually want this to be the case
+		   (see Collins 99 section 7.5.5 for a description of
+		    the constraint)
+
+distaflag	 = 1 for the adjacency condition in the distance measure
+		   to be used. This flag should almost certainly be
+		   set to be 1.
+
+distvflag	 = 1 for the verb condition in the distance measure
+		   to be used. This flag should almost certainly be
+		   set to be 1.
+
+npbflag		 = 1 for output format that can be scored against the
+		   the treebank. If it's set to 0 the output will include
+		   an extra level in some NPs, for example:
+
+npbflag = 1
+
+(TOP (S (NPB the man) (VP saw (NPB the dog))))
+
+vs.
+
+npbflag = 0
+
+(TOP (S (NP (NPB the man)) (VP saw (NP (NPB the dog)))))
+
+Notice the extra NP level when npbflag = 0. This extra level is more
+consistent (there are always NP and NPB levels, even when there are
+no modifiers to the noun phrase), so it may be be better for some
+applications.
+
+
+==============================================================================
+[2] Input format
+
+Input format of the tagged file:
+
+N word_1 tag_1 ... word_n tag_n
+
+where N is the number of words in the sentence.
+
+e.g.
+
+18 Pierre NNP Vinken NNP , , 61 CD years NNS old JJ , , will MD join VB the DT board NN as IN a DT nonexecutive JJ director NN Nov. NNP 29 CD . .
+
+==============================================================================
+[3] Output format
+
+Output format:
+
+In general, to see a straightforward version of the output,
+
+cat parsed_file | sec23/proc_pout.prl
+
+The "raw" output format is as follows:
+
+	First line is "PROB num_edges_in_chart log_prob 0"
+	e.g. PROB 3890 -72.7453 0 
+
+	Next few lines are the parse tree printed, one word per line, with
+	log probs on each constituent
+
+	Next line is the full parse output (see below for details)
+
+	Final line is "TIME time" e.g. "TIME 10" meaning the parse took 10
+	seconds
+
+The full parse output is in the following format:
+
+first an example:
+
+(TOP~will~1~1 (S~will~2~2 (NP-A~Vinken~2~1 (NPB~Vinken~2~2 Pierre/NNP Vinken/NNP ,/PUNC, ) (ADJP~old~2~2 (NPB~years~2~2 61/CD years/NNS ) old/JJ ,/PUNC, ) ) (VP~will~2~1 will/MD (VP-A~join~4~1 join/VB (NPB~board~2~2 the/DT board/NN ) (PP~as~2~1 as/IN (NPB~director~3~3 a/DT nonexecutive/JJ director/NN ) ) (NPB~Nov.~2~1 Nov./NNP 29/CD ./PUNC. ) ) ) ) ) 
+
+Now some details:
+
+1) Word tag pairs are separated by '/' . Punctuation marks have their POS
+   tag preceded by "PUNC". For example ,/PUNC,
+
+2) '(' and ')' show the tree bracketing. The opening parenthesis is
+immediately followed by a non-terminal, whose format is described in (3).
+
+3) Non-terminals are in the following format:
+
+        non-term-label~headword~total#_of_children~constituent_#
+
+   where constituent_# is the number of the child from which the headword is
+   taken. This uses 1 based indexing, with punctuation marks not being 
+   counted as children. For example:
+
+   (NP~flowers~4~4   the/DT green/JJ ,/PUNC, hungry/JJ flowers/NN )
+
+4) In models 2 and 3, "-A" is appended to non-terminals which are
+arguments (complements) as opposed to adjuncts. In model 3, "-g"
+is appended to non-terminals which contain a slash category.
+
+
+
+==============================================================================
+[4] Evaluating the accuracy on section 23
+
+See README.sec23 in the sec23/ directory for full details of how the
+parser output was scored.
+
+==============================================================================
+[5] A list of the files included in this package
+
+code/	this directory includes the source code for the parser
+
+examples/sec23.tagged	part-of-speech tagged version of section 23
+			of the treebank (tagged by Adwait Ratnaparkhi's
+			tagger)
+
+examples/sec00.tagged	part-of-speech tagged version of section 0
+			of the treebank (tagged by Adwait Ratnaparkhi's
+			tagger)
+
+sec23/	this directory has output on section 23 for the three models
+	(sec23.model1, sec23.model2, and sec23.model3). See README.sec23
+	for how to evaluate these three files against the treebank.
+
+sec23/proc_pout.prl	A useful script for converting the parser's output
+			to treebank-style parses
+
+models/model1	These three directories hold the grammar and lexicon
+models/model2	files for the three parsers.
+models/model3

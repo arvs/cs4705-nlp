@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+
+$m = 0;
+while(<>)
+{
+    if(m/TOP~/)
+    {
+	s/ T\/TRACE / /g;
+	s/^.*TOP~/(TOP~/g;
+	s/\(SG/\(S/g;
+        s/-g~/~/g;
+        s/-g_/_/g;
+        s/-A~/~/g;
+        s/-A_/_/g;
+        s/ \(\/-LRB- / -LRB-\/-LRB- /g;
+        s/ \)\/-RRB- / -RRB-\/-RRB- /g;
+        s/ /  /g;
+        s/PUNC//g;
+        s/ ([^ ]*[^\\])\/([^ \/]*) / ($2 $1) /g;
+        s/~[^ ]* / /g;
+
+        s/\(/ \( /g;
+        s/\)/ \) /g; 
+        s/_NA//g;
+        s/_AND//g;
+        s/NPB /NP /g;
+	s/\( */\(/g;
+	s/ *\)/\)/g;
+	s/  */ /g;
+	s/^ *//g;
+	print;
+    }
+
+}
