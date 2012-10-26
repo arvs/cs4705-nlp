@@ -5,11 +5,18 @@ from collections import defaultdict
 from count_cfg_freq import Counts
 
 class Parser:
+    Rule = namedtuple('Rule',['parent','left','right'])
+    terminal = namedtuple('terminal',['parent','word'])
+    bp = namedtuple('bp',['rule','s'])
+
     def __init__(self, filename):
         self.filename = filename
         self.counter = Counts()
         for l in open(filename):
             self.counter.count(json.loads(l))
+        self.rules = defaultdict(list)
+        for tup in self.counter.binary.keys():
+            rules[tup[0]].append(Rule(*tup))
 
     def replace_rare(self):
 
@@ -72,21 +79,26 @@ class Parser:
                 return [parent, cky_recover(pi,left,split,parent), cky_recover(pi,split+1,right,parent)]
 
         pi = {}
+
         n = len(sentence)
         for idx,word in enumerate(sentence,1):
-            for X in self.counter.nonterm.keys():
-                pi[(idx,idx,X)] = (self.q(X,word),1,(X,word))
+            for X in self.r.keys():
+                pi[(idx,idx,X)] = (self.q(X,word),bp(terminal(X,word), None))
 
-        for l in xrange(1, n + 1):
+        for l in xrange(1, n):
             for i in xrange(1, n + 1 - l):
                 j = i + l
                 max_prob, split, rule = (-1,-1,'sentinel')
                 # flatten, so that it is one large loop instead of many
-                for ((X,ch1,ch2), s) in itertools.product(self.counter.binary.keys(),range(i,j)):
-                    prob = self.q(X, [ch1,ch2])*pi.get((i,s,ch1),[0])[0]*pi.get((j,s+1,ch2),[0])[0]
-                    if prob > max_prob:
-                        max_prob,split,rule = (prob,s,(X,ch1,ch2))
-                    pi[(i,j,X)] = (max_prob,split,rule)
+                for X, possible_rules in self.rules()
+                    for rule in possible_rules:
+                        for s in xrange(i,j):
+                            prob = self.q(X, [rule.left, rule.right])* \
+                                pi.get((i,s,ch1),[0])[0]* \
+                                pi.get((j,s+1,ch2),[0])[0]
+                            if prob > max_prob:
+                                max_prob = (prob,s,(X,ch1,ch2))
+                            pi[(i,j,X)] = (max_prob,split,rule)
 
         head = pi.get((1,n,'S'))
         import ipdb
