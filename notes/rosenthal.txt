@@ -1,0 +1,63 @@
+Detecting Influence in Threaded Discussions: Exploring Online Genres and Trends
+Sara Rosenthal
+
+- in defense, can be used to detect potential influential terrorists
+- Cialdini - Weapons of Influence
+	- There are 6:
+		- reciprocation: people tend to return favors
+		- commitment & consistency: oral and written commitments are likely to be honored
+		- social proof: people follow what other so
+		- liking: people persuaded
+		- authority: 
+		- scarcity: scarcity 
+	- based on this, system components of influence
+		- sentiment, claims, argumentation, attempts to persuade, agreement/disagreement, demographics, dialog patterns, name mentions
+
+	- correlation between conversational behavior and influence
+	- social networks -- how influence is diffused through networks
+		- influence is driven by a mass of individuals as opposed to the influencers
+		- influencers tend to be people who have been influential in the past
+		- urls that are interesting are more likely to spread
+		- demographics affect influence
+- NLP approach
+	- influential users express negative sentiments vs people in other categories of users on twitter (users split into categories of influence)
+	- interruptions and topic initiations in spoken conversation are indicators of influence
+	- detect persuasion  in dialog on a microtext corpus of hostage negotiating transcripts with unigram features
+		-corpuses:
+			- wikipedia discussion forums: reporting reliability of arguments
+			- political forums, twitter, microblogs
+
+	- opinion detection / agreement:
+		- more likely to influence if agree with opinion, or say nice things
+		- "dictionary of affect in language" f(pleasantness, ..., ...) --> augmented with word net, MPQA
+		- sentence pre-processed, chunked and tagged
+			- POS tags and n grams with X^2 feature selection
+			- Syntactic features
+			- Social media features
+				- capitalized word, emoticon,punctuation, repeated question marks
+				- some features from Wikiopedia/MPQA don't occur at all
+			- logistic regression(n gram size, DAL + Wordnet, DAL + Dictionaries + SM, Wordnet+SM, Dictionaires)
+			- twitter performs well without social media features
+			- ellipses indicate objectivity
+		- cross-dataset training (i.e. train on livejournal, test on twitter)
+			- online genres do not predict MPQA sentences well
+			- livejournal predicts other online genres well
+			- wikipedia predicts twitter well
+
+	- claim detection
+		- assertion by speaker attempting to convince people of opinions
+			- statements can be beliefs, facts, requests
+			- facts can be beliefs if truth is unclear
+			- 3 features for belief statement
+				- has sentence, ratio, subj/obj patterns
+			- committed belief detects speaker's expression about own belief or statement truth
+				- committed == "I know"
+				- non-committed == "I may"
+				- N/A - "I wish"
+
+	- agreement detection
+		- pairwise
+		- wiki & livejournal annotated by in-house annotation tool
+		- thread structure (depth of sentences, share ancestor, root)
+		- use n grams as features from subjective bound between agreement & disagreement
+		- every permita4tk
